@@ -1,10 +1,5 @@
-flask-hello-world
-├── src
-│   ├── app.py
-│   ├── templates
-│   │   └── index.html
-│   └── static
-│       └── styles.css
-├── requirements.txt
-├── .env
-└── README.md
+Flask==3.1.0
+gunicorn==23.0.0
+python-dotenv==1.1.0
+requests==2.32.3
+bs4==0.0.2
