@@ -3,3 +3,4 @@ gunicorn==23.0.0
 python-dotenv==1.1.0
 requests==2.32.3
 bs4==0.0.2
+firebase_admin==6.7.0
