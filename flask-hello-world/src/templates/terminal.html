@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Terminal</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='image.ico') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #gradient-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.8;
+        }
+
+        .window {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 85vh;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .titlebar {
+            height: 28px;
+            background: rgba(40, 40, 40, 0.8);
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            -webkit-app-region: drag;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+            -webkit-app-region: no-drag;
+        }
+
+        .button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .close {
+            background: #ff5f56;
+        }
+
+        .maximize {
+            background: #27c93f;
+        }
+
+        .button:hover {
+            filter: brightness(0.8);
+        }
+
+        .title-text {
+            flex-grow: 1;
+            text-align: center;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        #terminal {
+            height: calc(100% - 28px);
+            padding: 20px;
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            background: transparent;
+            overflow-y: auto;
+        }
+
+        #output {
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+
+        #input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        #prompt {
+            color: #0f0;
+            margin-right: 10px;
+        }
+
+        #command-input {
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            flex-grow: 1;
+            outline: none;
+        }
+
+        /* Scrollbar styling */
+        #terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #terminal::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        #terminal::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gradient-canvas"></canvas>
+    <div class="window">
+        <div class="titlebar">
+            <div class="buttons">
+                <div class="button close" onclick="closeTab()"></div>
+                <div class="button maximize"></div>
+            </div>
+            <div class="title-text">Finding hot statistics near you</div>
+        </div>
+        <div id="terminal">
+            <div id="output"></div>
+            <div id="input-line">
+                <span id="prompt">$</span>
+                <input type="text" id="command-input" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fluid gradient animation
+        const canvas = document.getElementById('gradient-canvas');
+        const ctx = canvas.getContext('2d');
+        let time = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function animate() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            
+            // Light blue color scheme
+            gradient.addColorStop(0, `hsl(200, 70%, ${40 + Math.sin(time) * 10}%)`);
+            gradient.addColorStop(0.5, `hsl(220, 60%, ${45 + Math.cos(time * 0.8) * 10}%)`);
+            gradient.addColorStop(1, `hsl(240, 50%, ${35 + Math.sin(time * 1.2) * 10}%)`);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            time += 0.01;
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize canvas and start animation
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        animate();
+
+        // Add window button functionality
+        function closeTab() {
+            if (window.opener) {
+                window.close();
+            } else {
+                alert("This tab cannot be closed programmatically. Please close it manually.");
+            }
+        }
+
+        document.querySelector('.maximize').addEventListener('click', () => {
+            document.querySelector('.window').style.height = 
+                document.querySelector('.window').style.height === '100vh' ? '85vh' : '100vh';
+        });
+
+        // Terminal functionality
+        const terminal = document.getElementById('terminal');
+        const output = document.getElementById('output');
+        const input = document.getElementById('command-input');
+        let waitingForInput = false;
+
+        // Initial welcome message
+        output.innerHTML = "[0] Look at Me, I'm Awesome! (Your stats)\n";
+        output.innerHTML += "[1] Who's the Real MVP? (Comparison)\n";
+        output.innerHTML += "[2] Hasta La Vista, Baby (Exit)\n\n";
+        output.innerHTML += "Enter your choice: ";
+
+        input.addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                const command = input.value;
+                input.value = '';
+
+                // Show command in output
+                output.innerHTML += command + '\n';
+
+                // Send command to server
+                try {
+                    const response = await fetch('/execute', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({command: command}),
+                    });
+                    const data = await response.json();
+                    output.innerHTML += data.output + '\n';
+                    
+                    // Check if we need to reload
+                    if (data.reload) {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000); // Delay reload by 1 second to show goodbye message
+                    }
+
+                    waitingForInput = data.waiting_for_input;
+                    
+                    if (!waitingForInput) {
+                        output.innerHTML += "\nEnter your choice: ";
+                    }
+                } catch (error) {
+                    output.innerHTML += 'Error executing command\n';
+                }
+
+                // Scroll to bottom
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+flask-hello-world
+├── src
+│   ├── app.py
+│   ├── templates
+│   │   └── index.html
+│   └── static
+│       └── styles.css
+├── requirements.txt
+├── .env
+└── README.md
