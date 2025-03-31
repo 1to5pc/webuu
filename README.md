@@ -46,7 +46,7 @@ This is a Flask application that requires Firebase integration.
 
    ```bash
    git clone https://github.com/1to5pc/webuu.git
-   cd src
+   cd webuu
    ```
 
 2. Place your Firebase credentials:
