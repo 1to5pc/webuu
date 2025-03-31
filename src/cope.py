@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 import json
 import random
 import os
-from firebase_config import db  # Import db from firebase_config
+if os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+    from firebase_config import db
 
 # Global variables and configurations
 BASE_URL = "http://220.247.238.114/lg_report"
@@ -17,6 +18,10 @@ URLS = {
 
 def load_student_names():
     """Load student names from Firestore"""
+    if not os.path.exists('../firebase_credentials.json'):
+        print("⚠️ Firebase credentials not found. Name search is unavailable.")
+        return {}
+        
     try:
         student_names = {}
         docs = db.collection('studz').stream()
@@ -29,12 +34,12 @@ def load_student_names():
                 
         if not student_names:
             print("⚠️ Warning: No student data found in Firestore.")
-            return None
+            return {}
             
         return student_names
     except Exception as e:
         print(f"⚠️ Error accessing Firestore: {e}")
-        return None
+        return {}
 
 def check_input(input_text):
     """
@@ -85,7 +90,7 @@ def handle_name_search(value, student_names):
         else:
             print("❌ No matching names found")
     else:
-        print("❌ Name search unavailable (missing student_names.txt)")
+        print("❌ Name search unavailable Firebase connection failed")
     return None
 
 def get_user_input(prompt, student_names):

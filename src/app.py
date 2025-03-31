@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import cope
 import io
+import os
 from contextlib import redirect_stdout
-from firebase_config import db
+if os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+    from firebase_config import db
 
 app = Flask(__name__)
 program_state = {
@@ -18,7 +20,12 @@ program_state = {
 def initialize():
     global program_state
     if not program_state['initialized']:
-        program_state['student_names'] = cope.load_student_names()
+        # Check if Firebase credentials exist
+        if not os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+            print("⚠️ Firebase credentials not found. Some features may be unavailable.")
+            program_state['student_names'] = {}
+        else:
+            program_state['student_names'] = cope.load_student_names()
         program_state['initialized'] = True
 
 def validate_g0_number(g0_number):
@@ -57,10 +64,14 @@ def execute_command():
                     "reload": True
                 })
             elif command == "3":
-                program_state['current_option'] = "3"
-                program_state['waiting_for_input'] = True
-                program_state['step'] = 0
-                print("Enter your G0 number: ")
+                if not os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+                    print("\n⚠️ Firebase connection failed: credentials not found")
+                    program_state['waiting_for_input'] = False
+                else:
+                    program_state['current_option'] = "3"
+                    program_state['waiting_for_input'] = True
+                    program_state['step'] = 0
+                    print("Enter your G0 number: ")
             else:
                 print("Invalid command!")
         else:
