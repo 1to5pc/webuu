@@ -209,6 +209,11 @@
                 document.querySelector('.window').style.height === '100vh' ? '85vh' : '100vh';
         });
 
+        // Add click-to-focus functionality
+        document.getElementById('terminal').addEventListener('click', function() {
+            document.getElementById('command-input').focus();
+        });
+
         // Terminal functionality
         const terminal = document.getElementById('terminal');
         const output = document.getElementById('output');
