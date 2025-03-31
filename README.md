@@ -1,6 +1,6 @@
 # Flask Firebase Application
 
-This is a Flask application that requires Firebase integration.
+This is a Flask application that requires Firebase integration (for additional functionality).
 
 ## Prerequisites
 
@@ -92,4 +92,3 @@ This is a Flask application that requires Firebase integration.
 - Created a Firebase project
 - Downloaded the credentials JSON file
 - Placed the credentials file in the correct location
-- Added the file to .gitignore to prevent accidental commits
