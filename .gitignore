@@ -44,4 +44,4 @@ temp/
 .DS_Store
 Thumbs.db
 
-src/markzui-firebase-adminsdk-fbsvc-9b679ece1f.json
+src/firebase_credentials.json
