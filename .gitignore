@@ -44,4 +44,4 @@ temp/
 .DS_Store
 Thumbs.db
 
-src/firebase_credentials.json
+firebase_credentials.json
