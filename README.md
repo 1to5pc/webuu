@@ -17,7 +17,7 @@ This is a Flask application that requires Firebase integration.
 2. Generate a new private key:
    - Go to Project Settings > Service Accounts
    - Click "Generate New Private Key"
-   - Save the JSON file as `firebase_credentials.json` in the src directory
+   - Save the JSON file as `firebase_credentials.json` somewhere
 3. Set up Firestore Database:
    - Go to Firebase Console > Cloud Firestore
    - Create a new database in production mode
@@ -45,14 +45,14 @@ This is a Flask application that requires Firebase integration.
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
-   cd flask-hello-world
+   git clone https://github.com/1to5pc/webuu.git
+   cd src
    ```
 
 2. Place your Firebase credentials:
 
    ```bash
-   cp path/to/firebase-credentials.json ./firebase-credentials.json
+   cp path/to/firebase_credentials.json ./firebase_credentials.json
    ```
 
 3. Create a virtual environment:
