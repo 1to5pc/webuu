@@ -89,7 +89,8 @@ def execute_command():
                 elif program_state['step'] == 1:
                     try:
                         db.collection('addMe').document(program_state['temp_g0']).set({
-                            'name': command.strip()
+                            'name': command.strip(),
+                            'verified': False
                         })
                         print(f"✅ Successfully added {program_state['temp_g0']} with name: {command}")
                         print("Your info will be added to the database shortly.")
