@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import json
 import random
 import os
+from firebase_config import db  # Import db from firebase_config
 
 # Global variables and configurations
 BASE_URL = "http://220.247.238.114/lg_report"
@@ -15,23 +16,24 @@ URLS = {
 }
 
 def load_student_names():
-    """Load student names from file"""
+    """Load student names from Firestore"""
     try:
-        # Get the directory where cope.py is located
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(current_dir, 'student_names.txt')
-        
         student_names = {}
-        with open(file_path, 'r') as file:
-            for line in file:
-                if ':' in line:
-                    g_number, name = line.strip().split(':', 1)
-                    student_names[name.strip()] = g_number.strip()
+        docs = db.collection('studz').stream()
+        
+        for doc in docs:
+            g_number = doc.id
+            name = doc.get('name')
+            if name:
+                student_names[name] = g_number
+                
+        if not student_names:
+            print("⚠️ Warning: No student data found in Firestore.")
+            return None
+            
         return student_names
-    except FileNotFoundError:
-        print("⚠️ Warning: student_names.txt not found.")
-        print(f"Looking for file at: {file_path}")
-        print("Name search will be unavailable.")
+    except Exception as e:
+        print(f"⚠️ Error accessing Firestore: {e}")
         return None
 
 def check_input(input_text):
