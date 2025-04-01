@@ -27,7 +27,8 @@ def test_render_deployment():
             deploy_status = data[0]['deploy']['status']
             if "failed" in deploy_status.lower():
                 pytest.fail(f"Deployment failed! Current status: {deploy_status}")
-            return
+            if deploy_status.lower() in ['live', 'created']:
+                return
             
         time.sleep(1)
     
