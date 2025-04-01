@@ -18,7 +18,7 @@ URLS = {
 
 def load_student_names():
     """Load student names from Firestore"""
-    if not os.path.exists('../firebase_credentials.json'):
+    if not os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
         print("⚠️ Firebase credentials not found. Name search is unavailable.")
         return {}
         
