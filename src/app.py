@@ -117,5 +117,17 @@ def execute_command():
         "waiting_for_input": program_state['waiting_for_input']
     })
 
+@app.route('/reset', methods=['POST'])
+def reset_state():
+    global program_state
+    program_state = {
+        'waiting_for_input': False,
+        'current_option': None,
+        'step': 0,
+        'student_names': None,
+        'initialized': False
+    }
+    return jsonify({"status": "success"})
+
 if __name__ == '__main__':
     app.run(debug=False)

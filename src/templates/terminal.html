@@ -160,6 +160,12 @@
     </div>
 
     <script>
+        // Add this near the top of the script section
+        window.addEventListener('beforeunload', function() {
+            // Send a synchronous request to reset the state
+            navigator.sendBeacon('/reset');
+        });
+
         // Fluid gradient animation
         const canvas = document.getElementById('gradient-canvas');
         const ctx = canvas.getContext('2d');
