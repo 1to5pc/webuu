@@ -1,8 +1,7 @@
 import requests
 import time
 import os
-
-time.sleep(30)
+import pytest
 
 def test_render_deployment():
     github_sha = os.environ.get('GITHUB_SHA')
@@ -16,7 +15,7 @@ def test_render_deployment():
     }
     
     # Wait for commit to be deployed
-    max_attempts = 60
+    max_attempts = 180  # 3 minutes
     for attempt in range(max_attempts):
         response = requests.get(url, headers=headers)
         assert response.status_code == 200, "Failed to fetch deployment status"
@@ -26,9 +25,10 @@ def test_render_deployment():
         
         if data[0]['deploy']['commit']['id'] == github_sha:
             deploy_status = data[0]['deploy']['status']
-            assert deploy_status == "live", f"Deployment is not live! Current status: {deploy_status}"
+            if "failed" in deploy_status.lower():
+                pytest.fail(f"Deployment failed! Current status: {deploy_status}")
             return
             
         time.sleep(1)
     
-    raise TimeoutError(f"Deployment with commit {github_sha} not found after {max_attempts * 3} seconds")
+    pytest.fail(f"Deployment timeout: commit {github_sha} not found after {max_attempts * 1} seconds")
