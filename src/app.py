@@ -101,7 +101,7 @@ def execute_command():
                         print("❌ Invalid G0 number format! Should be like G02199")
                 elif program_state['step'] == 1:
                     try:
-                        db.collection('addMe').document(program_state['temp_g0']).set({
+                        db.collection('studz').document(program_state['temp_g0']).set({
                             'name': command.strip(),
                             'verified': False
                         })
