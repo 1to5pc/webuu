@@ -3,7 +3,9 @@ from bs4 import BeautifulSoup
 import json
 import random
 import os
-if os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+
+cred_path = '/etc/secrets/firebase_credentials.json' if "RENDER" in os.environ else os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')
+if os.path.exists(cred_path):
     from firebase_config import db
 
 # Global variables and configurations
@@ -18,7 +20,7 @@ URLS = {
 
 def load_student_names():
     """Load student names from Firestore"""
-    if not os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+    if not os.path.exists(cred_path):
         print("⚠️ Firebase credentials not found. Name search is unavailable.")
         return {}
         

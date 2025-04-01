@@ -3,7 +3,9 @@ import cope
 import io
 import os
 from contextlib import redirect_stdout
-if os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+
+cred_path = '/etc/secrets/firebase_credentials.json' if "RENDER" in os.environ else os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')
+if os.path.exists(cred_path):
     from firebase_config import db
 
 app = Flask(__name__)
@@ -21,7 +23,7 @@ def initialize():
     global program_state
     if not program_state['initialized']:
         # Check if Firebase credentials exist
-        if not os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+        if not os.path.exists(cred_path):
             print("⚠️ Firebase credentials not found. Some features may be unavailable.")
             program_state['student_names'] = {}
         else:
@@ -64,7 +66,7 @@ def execute_command():
                     "reload": True
                 })
             elif command == "3":
-                if not os.path.exists(os.path.join(os.path.dirname(__file__), '../firebase_credentials.json')):
+                if not os.path.exists(cred_path):
                     print("\n⚠️ Firebase connection failed: credentials not found")
                     program_state['waiting_for_input'] = False
                 else:
