@@ -45,7 +45,7 @@ def index():
 @app.route('/execute', methods=['POST'])
 def execute_command():
     global program_state
-    command = request.json.get('command')
+    command = request.json.get('command').strip()
     output = io.StringIO()
     
     with redirect_stdout(output):
