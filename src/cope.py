@@ -63,37 +63,30 @@ def check_input(input_text):
     # Otherwise assume it's a name search
     return ('name', input_text)
 
+def handle_multiple_matches(matched_names, student_names):
+    """Handle multiple name matches and return selected G0 number"""
+    formatted_matches = []
+    for i, name in enumerate(matched_names):
+        formatted_matches.append(f"[{i}] {name} ({student_names[name]})")
+    return "\n".join(formatted_matches)
+
 def handle_name_search(value, student_names):
     """Handle name search logic"""
-    if student_names:
-        name_parts = [part.lower() for name in student_names.keys() 
-                     for part in name.split()]
-        if any(part.lower() in name_parts for part in value.split()):
-            matched_names = [name for name in student_names.keys() 
-                           if any(part.lower() in name.lower() 
-                                for part in value.split())]
-            if len(matched_names) == 1:
-                print(f"Found {matched_names[0]} with {student_names[matched_names[0]]}")
-                return student_names[matched_names[0]]
-            elif len(matched_names) > 1:
-                print("\nMultiple matches found:")
-                for i, name in enumerate(matched_names):
-                    print(f"[{i}] {name} with {student_names[name]}")
-                while True:
-                    try:
-                        choice = int(input("\nEnter number to select (or -1 to search again): "))
-                        if choice == -1:
-                            return None
-                        if 0 <= choice < len(matched_names):
-                            return student_names[matched_names[choice]]
-                        print("Invalid selection number")
-                    except ValueError:
-                        print("Please enter a valid number")
-        else:
-            print("❌ No matching names found")
-    else:
-        print("❌ Name search unavailable Firebase connection failed")
-    return None
+    if not student_names:
+        return None, "❌ Name search unavailable Firebase connection failed"
+        
+    matched_names = [name for name in student_names.keys() 
+                    if any(part.lower() in name.lower() 
+                          for part in value.split())]
+    
+    if not matched_names:
+        return None, "❌ No matching names found"
+    
+    if len(matched_names) == 1:
+        return student_names[matched_names[0]], None
+    
+    # Multiple matches found
+    return matched_names, handle_multiple_matches(matched_names, student_names)
 
 def get_user_input(prompt, student_names):
     """Handle user input for G0 number or name"""
@@ -104,9 +97,23 @@ def get_user_input(prompt, student_names):
         if input_type == 'g0':
             return value
         elif input_type == 'name':
-            result = handle_name_search(value, student_names)
-            if result:
+            result, message = handle_name_search(value, student_names)
+            if isinstance(result, list):  # Multiple matches
+                print(message)
+                while True:
+                    try:
+                        choice = int(input("\nEnter number to select (or -1 to search again): "))
+                        if choice == -1:
+                            break
+                        if 0 <= choice < len(result):
+                            return student_names[result[choice]]
+                        print("Invalid selection number")
+                    except ValueError:
+                        print("Please enter a valid number")
+            elif result:
                 return result
+            else:
+                print(message)
         else:
             print("❌ Invalid G0-number format. Should be like G02199")
 
@@ -296,9 +303,12 @@ def handle_single_input(command, student_names):
     if input_type == 'g0':
         cred = value
     elif input_type == 'name':
-        cred = handle_name_search(value, student_names)
-        if not cred:
-            return "❌ No matching names found or invalid selection"
+        result, message = handle_name_search(value, student_names)
+        if isinstance(result, list):  # Multiple matches
+            return message  # Return formatted list of matches
+        if not result:
+            return message  # Return error message
+        cred = result
     else:
         return "❌ Invalid G0-number format. Should be like G02199"
 

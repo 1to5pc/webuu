@@ -14,7 +14,9 @@ program_state = {
     'current_option': None,
     'step': 0,
     'student_names': None,
-    'initialized': False  # Track initialization state
+    'initialized': False,  # Track initialization state
+    'matched_names': None,  # Add this to store matched names
+    'current_search': None  # Add this to store current search context
 }
 
 # Load student names before each request
@@ -49,7 +51,52 @@ def execute_command():
     output = io.StringIO()
     
     with redirect_stdout(output):
-        if not program_state['waiting_for_input']:
+        if program_state.get('matched_names'):  # Handle multiple match selection
+            try:
+                choice = int(command)
+                if choice == -1:
+                    program_state['matched_names'] = None
+                    program_state['waiting_for_input'] = True
+                    print(f"Enter {program_state['current_search']}: ")
+                    return jsonify({
+                        "output": output.getvalue(),
+                        "waiting_for_input": True
+                    })
+                
+                if 0 <= choice < len(program_state['matched_names']):
+                    selected_name = program_state['matched_names'][choice]
+                    selected_g0 = program_state['student_names'][selected_name]
+                    program_state['matched_names'] = None
+                    
+                    # Handle the selection based on current context
+                    if program_state['current_option'] == "0":
+                        result = cope.handle_single_input(selected_g0, program_state['student_names'])
+                        program_state['waiting_for_input'] = False
+                        print(result)
+                    elif program_state['current_option'] == "1":
+                        if program_state['step'] == 0:
+                            result = cope.handle_first_input(selected_g0, program_state['student_names'])
+                            program_state['step'] = 1
+                            print("\nEnter second G0-number or name: ")
+                        else:
+                            result = cope.handle_second_input(selected_g0, program_state['student_names'])
+                            program_state['waiting_for_input'] = False
+                            print(result)
+                else:
+                    print("Invalid selection number")
+                    print("\nEnter number to select (or -1 to search again): ")
+                    return jsonify({
+                        "output": output.getvalue(),
+                        "waiting_for_input": True
+                    })
+            except ValueError:
+                print("Please enter a valid number")
+                print("\nEnter number to select (or -1 to search again): ")
+                return jsonify({
+                    "output": output.getvalue(),
+                    "waiting_for_input": True
+                })
+        elif not program_state['waiting_for_input']:
             if command == "0":
                 program_state['current_option'] = "0"
                 program_state['waiting_for_input'] = True
@@ -78,18 +125,46 @@ def execute_command():
                 print("Invalid command!")
         else:
             if program_state['current_option'] == "0":
-                result = cope.handle_single_input(command, program_state['student_names'])
-                program_state['waiting_for_input'] = False
-                print(result)
+                result, message = cope.handle_name_search(command, program_state['student_names'])
+                if isinstance(result, list):  # Multiple matches found
+                    program_state['matched_names'] = result
+                    program_state['current_search'] = "G0-number or name"
+                    print(message)
+                    print("\nEnter number to select (or -1 to search again): ")
+                else:
+                    program_state['waiting_for_input'] = False
+                    if result:
+                        print(cope.handle_single_input(result, program_state['student_names']))
+                    else:
+                        print(message)
             elif program_state['current_option'] == "1":
                 if program_state['step'] == 0:
-                    result = cope.handle_first_input(command, program_state['student_names'])
-                    program_state['step'] = 1
-                    print("\nEnter second G0-number or name: ")
+                    result, message = cope.handle_name_search(command, program_state['student_names'])
+                    if isinstance(result, list):  # Multiple matches found
+                        program_state['matched_names'] = result
+                        program_state['current_search'] = "first G0-number or name"
+                        print(message)
+                        print("\nEnter number to select (or -1 to search again): ")
+                    else:
+                        program_state['step'] = 1
+                        if result:
+                            print(cope.handle_first_input(result, program_state['student_names']))
+                            print("\nEnter second G0-number or name: ")
+                        else:
+                            print(message)
                 else:
-                    result = cope.handle_second_input(command, program_state['student_names'])
-                    program_state['waiting_for_input'] = False
-                    print(result)
+                    result, message = cope.handle_name_search(command, program_state['student_names'])
+                    if isinstance(result, list):  # Multiple matches found
+                        program_state['matched_names'] = result
+                        program_state['current_search'] = "second G0-number or name"
+                        print(message)
+                        print("\nEnter number to select (or -1 to search again): ")
+                    else:
+                        program_state['waiting_for_input'] = False
+                        if result:
+                            print(cope.handle_second_input(result, program_state['student_names']))
+                        else:
+                            print(message)
             elif program_state['current_option'] == "3":
                 if program_state['step'] == 0:
                     if validate_g0_number(command):
@@ -114,7 +189,7 @@ def execute_command():
 
     return jsonify({
         "output": output.getvalue(),
-        "waiting_for_input": program_state['waiting_for_input']
+        "waiting_for_input": program_state['waiting_for_input'] or program_state.get('matched_names') is not None
     })
 
 @app.route('/reset', methods=['POST'])
@@ -125,7 +200,9 @@ def reset_state():
         'current_option': None,
         'step': 0,
         'student_names': None,
-        'initialized': False
+        'initialized': False,
+        'matched_names': None,
+        'current_search': None
     }
     return jsonify({"status": "success"})
 
