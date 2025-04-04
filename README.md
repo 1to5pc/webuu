@@ -1,4 +1,4 @@
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/1to5pc/webuu/python-package.yml?style=for-the-badge&label=Render%20Build)](https://webuu.render.com)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/1to5pc/webuu/python-package.yml?style=for-the-badge&label=Render%20Build)](https://webuu.onrender.com)
 
 
 # Flask Firebase Application
