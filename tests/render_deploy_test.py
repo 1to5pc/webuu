@@ -8,7 +8,7 @@ def test_render_deployment():
     if not github_sha:
         raise ValueError("GITHUB_SHA environment variable not found")
     
-    url = "https://api.render.com/v1/services/srv-cvkionl6ubrc73fpf2ug/deploys?limit=1"
+    url = "https://api.render.com/v1/services/srv-cvntjjh5pdvs73dhcsfg/deploys?limit=1"
     headers = {
         "accept": "application/json",
         "authorization": "Bearer " + os.environ.get('RENDER_API_KEY')
