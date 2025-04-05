@@ -74,7 +74,11 @@ def handle_name_search(value, student_names):
     """Handle name search logic"""
     if not student_names:
         return None, "❌ Name search unavailable Firebase connection failed"
-        
+    
+    # Check if input is a G0 number
+    if check_input(value)[0] == "g0":
+        return value, None
+      
     matched_names = [name for name in student_names.keys() 
                     if any(part.lower() in name.lower() 
                           for part in value.split())]
