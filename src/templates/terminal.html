@@ -84,6 +84,22 @@
             user-select: none;
         }
 
+        /* Add these new styles */
+        .info-button {
+            margin-left: auto;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            font-style: italic;
+            padding: 0 10px;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+        }
+
+        .info-button:hover {
+            color: rgb(39, 143, 143);
+        }
+
         #terminal {
             height: calc(100% - 28px);
             padding: 20px;
@@ -155,6 +171,8 @@
                 <div class="button maximize"></div>
             </div>
             <div class="title-text">Finding hot statistics near you</div>
+            <!-- Add this new element -->
+            <a href="https://github.com/1to5pc/webuu" target="_blank" class="info-button">i</a>
         </div>
         <div id="terminal">
             <div id="output"></div>
