@@ -182,6 +182,7 @@ def execute_command():
                         })
                         print(f"✅ Successfully added {program_state['temp_g0']} with name: {command}")
                         print("Your info will be added to the database shortly.")
+                        print("Refresh the page to find yourself in the name list.")
                     except Exception as e:
                         print(f"❌ Error saving to database: {str(e)}")
                     program_state['waiting_for_input'] = False
